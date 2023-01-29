@@ -1,6 +1,6 @@
 # Battlecode 2023 Scaffold
 
-This is the Battlecode 2023 scaffold, containing an `forgetthealamo`. Read https://play.battlecode.org/bc23/getting-started!
+This is the Battlecode 2023 scaffold, containing an `examplefuncsplayer`. Read https://play.battlecode.org/bc23/getting-started!
 
 ### Project Structure
 
@@ -27,8 +27,8 @@ This is the Battlecode 2023 scaffold, containing an `forgetthealamo`. Read https
 
 ### How to get started
 
-You are free to directly edit `forgetthealamo`.
-However, we recommend you make a new bot by copying `forgetthealamo` to a new package under the `src` folder.
+You are free to directly edit `examplefuncsplayer`.
+However, we recommend you make a new bot by copying `examplefuncsplayer` to a new package under the `src` folder.
 
 ### Useful Commands
 

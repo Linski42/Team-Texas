@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import forgetthealamo.*;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -74,12 +75,12 @@ public strictfp class RobotPlayer {
                 // use different strategies on different robots. If you wish, you are free to rewrite
                 // this into a different control structure!
                 switch (rc.getType()) {
-                    case HEADQUARTERS:     runHeadquarters(rc);  break;
-                    case CARRIER:      runCarrier(rc);   break;
-                    case LAUNCHER: runLauncher(rc); break;
+                    case HEADQUARTERS:     Headquarters.runHeadquarters(rc);  break;
+                    case CARRIER:      Carrier.runCarrier(rc);   break;
+                    case LAUNCHER: Launcher.runLauncher(rc); break;
                     case BOOSTER: // Examplefuncsplayer doesn't use any of these robot types below.
                     case DESTABILIZER: // You might want to give them a try!
-                    case AMPLIFIER:       break;
+                    case AMPLIFIER: Amplifier.runAmplifier(rc);       break;
                 }
 
             } catch (GameActionException e) {

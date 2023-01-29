@@ -27,7 +27,13 @@ public class Launcher {
     rc.setIndicatorString(String.valueOf(++ind));//1
     WellInfo[] LOOT = rc.senseNearbyWells();
     if(LOOT.length > 0){
-        rc.writeSharedArray(8, Utility.serializeMapLocation(LOOT[0].getMapLocation()));
+        if(rc.canWriteSharedArray(8, 0))
+            rc.writeSharedArray(8, Utility.serializeMapLocation(LOOT[0].getMapLocation()));
+    }
+    int[] islands = rc.senseNearbyIslands();
+    if(islands.length > 0){
+        if(rc.canWriteSharedArray(9, 0))
+            rc.writeSharedArray(9, Utility.serializeMapLocation(rc.senseNearbyIslandLocations(islands[0])[0]));
     }
     try{
         eLS = Utility.deserializeRobotLocation(rc.readSharedArray(16+(unit*15)));
@@ -35,7 +41,6 @@ public class Launcher {
     }catch(GameActionException e){
         rc.setIndicatorString(e.getMessage());
     }
-    
     rc.setIndicatorString(String.valueOf(++ind));//2
     int targetID = 0;
     try{
@@ -79,13 +84,16 @@ public class Launcher {
                     }
                 }
                 int sPos = 15 + (15*unit); //TODO: Make sure all of this works
-                rc.writeSharedArray(sPos+1, Utility.serializeRobotLocation(ri));
-                rc.writeSharedArray(sPos+2, ri.getID());
+                if(rc.canWriteSharedArray(sPos+1, 0))
+                    rc.writeSharedArray(sPos+1, Utility.serializeRobotLocation(ri));
+                if(rc.canWriteSharedArray(sPos+2, 0))
+                    rc.writeSharedArray(sPos+2, ri.getID());
                 MapLocation newCent = Zone.calculateCenter(thisLoc, rInfo, targetInfo);
                 boolean rub = false;
                 if(rc.canSenseLocation(newCent)){
                     rub = rc.sensePassability(newCent);   
                 }
+                if(rc.canWriteSharedArray(sPos+3, 0))
                     rc.writeSharedArray(sPos+3, Utility.serializeMapLocation(newCent));
                 }
            desiredPos = zone.getLocationInZone(2);
@@ -103,7 +111,8 @@ public class Launcher {
                 }
             }
             MapLocation newCent = Zone.calculateCenter(thisLoc, rInfo, ti);
-            rc.writeSharedArray(18+(15*unit), Utility.serializeMapLocation(newCent));
+            if(rc.canWriteSharedArray(18+(15*unit), 0))
+                rc.writeSharedArray(18+(15*unit), Utility.serializeMapLocation(newCent));
                 //run away
                 //TODO: I want to play with this to see if it's too fidgety as is        
         }

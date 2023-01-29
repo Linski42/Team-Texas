@@ -4,10 +4,6 @@ import java.util.LinkedList;
 import battlecode.common.*;
 
 public class Build {
-    private int idealNumberMiners = 0;
-    private int idealNumberLaboratories = 0;
-    private int idealNumberSoldiers = 0;
-    private int idealNumberSages = 0;
     static final Direction[] directions = {
         Direction.NORTH,
         Direction.NORTHEAST,
@@ -30,8 +26,6 @@ public class Build {
         return false;
     }
     public static RobotInfo tryBuild(RobotController rc, Direction dir, RobotType type) throws GameActionException{
-        int lead = rc.getTeamAdamantium(rc.getTeam());
-        int gold = rc.getTeamGoldAmount(rc.getTeam());
         RobotInfo newRobot = null;
         Direction nD = dir;
         MapLocation adjLocation = rc.adjacentLocation(dir);
@@ -40,8 +34,8 @@ public class Build {
             adjLocation = rc.adjacentLocation(nD);
         }
 
-        if(rc.canBuildRobot(type, dir)){
-            rc.buildRobot(type, dir);
+        if(rc.canBuildRobot(type, adjLocation)){
+            rc.buildRobot(type, adjLocation);
             newRobot = rc.senseRobotAtLocation(adjLocation);
         } else{
             return null;
@@ -50,7 +44,7 @@ public class Build {
     }
     public final int requestsChannel = 0;
     public final static int[] unitPos = new int[]{30, 45, 60}; //leader of each u
-    public static RobotInfo buildSage(RobotController rc, Direction directionTo) throws GameActionException {
+    public static RobotInfo buildLAUNCHER(RobotController rc, Direction directionTo) throws GameActionException {
         //34 - 44
         int targetUnit = 1;
         int[] units = new int[3];
@@ -98,7 +92,7 @@ public class Build {
                 }
             }
             
-            RobotInfo ri = tryBuild(rc, directionTo, RobotType.SAGE);
+            RobotInfo ri = tryBuild(rc, directionTo, RobotType.LAUNCHER);
 
             if(ri != null){
                 rc.writeSharedArray(j, ri.ID);
@@ -122,28 +116,12 @@ public class Build {
     }
 
     
-    public static int getIdealNumMiners(RobotController rc){
-        int x = (rc.getMapHeight() + rc.getMapWidth() + (rc.getRoundNum() / 5)) / 5;//maybe tweak to 15?
-        //every 100 turns we want one more miner
-        //if map is 60 x 60 then we'd get a total of  12 miners:)
+    public static int getIdealNumCarriers(RobotController rc){
+        int x = rc.getRoundNum() / 5;//maybe tweak to 15?
+        //every 5 turns we want one more carrier
         return x;
     }
-
-    public static int getIdealNumLabs(RobotController rc) {
-        final int mapSize = (rc.getMapHeight() + rc.getMapWidth())/2;
-        final int leadAmount = rc.getTeamLeadAmount(rc.getTeam());
-        //I think this works, if map is like 60 x 60 then we'd get 60 as our map size which feels pretty reasonable
-
-        return ((mapSize + (rc.getRoundNum()/20)+(leadAmount/300)) / 20);
-        //20 units map size = 1 more lab
-        //every 200 turns we want one more lab
-        //if our reserve surpasses 300 then we're clearly not using it effectively
-    }
-    public static int getIdealNumSoldiers(RobotController rc) {
-        int x =(rc.getMapHeight() + rc.getMapWidth()) / 10;
-        return x;
-    }
-    public static int getIdealNumBuilders(RobotController rc) {
-        return 1 + (getIdealNumLabs(rc));
+    public static int getIdealNumLaunchers(RobotController rc){
+        return getIdealNumCarriers(rc) / 3;
     }
 }

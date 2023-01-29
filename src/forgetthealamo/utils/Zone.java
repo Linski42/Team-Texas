@@ -1,4 +1,4 @@
-package examplefuncsplayer.Utils;
+package forgetthealamo.utils;
 
 import java.util.Map;
 
@@ -19,13 +19,13 @@ public class Zone {
         this.enemyLoc = enemyLoc;
         this.centerLoc = centerLoc;
         Direction dir = centerLoc.directionTo(enemyLoc);
-        Direction ontwDir = Utility.plus30(dir);
+        Direction ontwDir = dir.rotateLeft();
         Direction twthDir = dir.opposite();
-        Direction thonDir = Utility.minus30(dir);
+        Direction thonDir = dir.rotateRight();
         ontw = centerLoc.add(ontwDir);
         twth = centerLoc.add(twthDir);
         thon = centerLoc.add(thonDir);
-        for(int i = 0; i < 8; i++){  //TODO: Make more effective unitSize zone scale algorithm and make it based on enemy vis
+        for(int i = 0; i < Math.sqrt(enemyVision); i++){ //visionradius
             ontw = ontw.add(ontwDir);
             twth = twth.add(twthDir);
             thon = thon.add(thonDir);
@@ -35,9 +35,7 @@ public class Zone {
         rc.setIndicatorLine(thon, centerLoc, 0, 0, 255);
         
     }
-
     /*
- *                        @@@
  *                        @@@
  *                        @@@
  *                        @@@
@@ -55,11 +53,8 @@ public class Zone {
  *            @@@@    zone 1      @@@
  *           @@@                   @@@@
  *          @@@                     @@@@@
- *        @@@                         @@@@@
+ *        @@@                         @@@@
  *       @@                             @@@
- *      @@                               @@@
- *   @@@@                                 @@@
- *  @@@                                   @@@
  * 
  */
     /**
@@ -107,7 +102,7 @@ public class Zone {
         final int dist = (int) Math.sqrt(robotLocation.distanceSquaredTo(target.getLocation()));
         Direction d = target.getLocation().directionTo(robotLocation);
         MapLocation out = robotLocation;
-        for (int i = dist; i <= 6; i++) {//TODO: I actually need to do some non-trivial math to calculate what this point should be oh no
+        for (int i = dist; i <= 6; i++) {
             out = out.add(d);
         }
         return out;

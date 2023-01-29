@@ -1,4 +1,4 @@
-package examplefuncsplayer;
+package forgetthealamo;
 import battlecode.common.*;
 
 public class Carrier {
@@ -6,7 +6,5 @@ public class Carrier {
 
 
     }
-
-
 
 }

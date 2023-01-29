@@ -1,7 +1,4 @@
-package examplefuncsplayer.utils;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
+package forgetthealamo.utils;
 
 import battlecode.common.*;
 
@@ -108,15 +105,15 @@ public class Utility {
             yS = "0" + yS;
 
         String vNumber = "111"; //noType for some reason => 111
-        switch(ri.getType()){
-            case ARCHON: vNumber = "000";  break;
-            case MINER: vNumber = "001";  break;
-            case BUILDER: vNumber = "010";  break;
-            case SOLDIER: vNumber = "011";  break;
-            case SAGE: vNumber = "100";  break;
-            case LABORATORY: vNumber = "101";  break;
-            case WATCHTOWER: vNumber = "110";  break;
+        switch (ri.getType()) {
+            case AMPLIFIER: vNumber = "000";  break;
+            case BOOSTER: vNumber = "001";  break;
+            case CARRIER: vNumber = "010";  break;
+            case HEADQUARTERS: vNumber = "011";  break;
+            case DESTABILIZER: vNumber = "100";  break;
+            case LAUNCHER: vNumber = "101";  break;
         }
+
         System.out.println("y: " + yS);
         System.out.println("x: " + binS);
         System.out.println("type: " + vNumber);
@@ -131,7 +128,7 @@ public class Utility {
         return out;
     }
 
-     public static int serializeMapLocation(MapLocation m, int rubbleAmount) { //TODO: Figure out how much rubble we can actually have
+     public static int serializeMapLocation(MapLocation m) { //TODO: Figure out how much rubble we can actually have
         String binS = Integer.toBinaryString(m.x);
         for (int i = binS.length(); i < 6; i++) //this would be one line in python
             binS = "0" + binS;
@@ -140,7 +137,7 @@ public class Utility {
         for (int i = yS.length(); i < 6; i++)
             yS = "0" + yS;
 
-        String vNumber = Integer.toBinaryString(rubbleAmount); //TODO:This is going to break
+        String vNumber = "0"; //TODO:This is going to break
         
         System.out.println("x: " + binS);
         System.out.println("y: " + yS);
@@ -186,29 +183,25 @@ public class Utility {
 
     public static RobotType robotTypeIntValue(int i) {
         switch(i){
-            case 0: return RobotType.ARCHON;  
-            case 1: return RobotType.MINER;  
-            case 2: return RobotType.BUILDER;  
-            case 3: return RobotType.SOLDIER;  
-            case 4: return RobotType.SAGE;  
-            case 5: return RobotType.LABORATORY;  
-            case 6: return RobotType.WATCHTOWER;  
+            case 0: return RobotType.AMPLIFIER;  
+            case 1: return RobotType.BOOSTER;  
+            case 2: return RobotType.CARRIER;  
+            case 3: return RobotType.HEADQUARTERS;  
+            case 4: return RobotType.DESTABILIZER;  
+            case 5: return RobotType.LAUNCHER;  
         }
-        return RobotType.SAGE; //TODO: This could cause issues
+
+        return RobotType.LAUNCHER; 
     }
     public static int getActionRadiusSquared(RobotType targetType, int level) { //TODO: Figure out scaling for level
-        int vNumber = 6;
-        switch(targetType){
-            case WATCHTOWER:
-            case SAGE: vNumber = 34;  break;
-            case LABORATORY: vNumber = 0;  break;
-            default: vNumber = 20;  break;
-        }
-        return vNumber;
+        // TODO: 
+        return targetType.actionRadiusSquared + level;
     }
+
     public static int[] deserializeCountAndOrder(int readSharedArray) {
         return null;
     }
+
     public static int[] getSageIndex(RobotController rc) {
         int id = rc.getID();
         for (int i = 1; i <= 3; i++) {
@@ -227,7 +220,7 @@ public class Utility {
                     val = -1;
                 }
             }
-            if(val == id){ //TODO: This probably does not work
+            if(val == id){ 
                 return new int[]{j, i};
             }
 

@@ -17,7 +17,7 @@ public class Build {
     public static  boolean buildEarlygame(RobotController rc){
         int round = rc.getRoundNum();
         //Direction to center, oft has resources
-        Direction cDir = rc.getLocation().directionTo(Utility.getMapCenter(rc));         
+        Direction cDir = rc.getLocation().directionTo(new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2));         
         //start by sending out miners to locations adjacent to center
         if(round < 5){
             

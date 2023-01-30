@@ -1,11 +1,12 @@
+package forgetthealamo;
+
 import battlecode.common.*;
 
-import dijkstra.Dijkstra;
 import forgetthealamo.utils.Build;
 import forgetthealamo.utils.Utility;
 
 public class Headquarters {
-    private static void runHeadquarters(RobotController rc, Dijkstra dijik) throws GameActionException {
+    private static void runHeadquarters(RobotController rc) throws GameActionException {
         final int ideal_launcher_number = Build.getIdealNumLaunchers(rc);
         final int ideal_amplifier_number = Build.getIdealNumLaunchers(rc)/2;
         final int ideal_carrier_number = Build.getIdealNumCarriers(rc);
@@ -13,7 +14,7 @@ public class Headquarters {
         final int currentCarriers = rc.readSharedArray(3);
         final int currentAmplifiers = rc.readSharedArray(4);
         final RobotInfo[] nearby = rc.senseNearbyRobots();
-        final MapLocation mapCenter = Utility.getMapCenter(rc);
+        final MapLocation mapCenter = new MapLocation(rc.getMapHeight()/2, rc.getMapWidth()/2);
         int nearbyEnemyCount = 0;
         RobotInfo[] nearbyEnemies = new RobotInfo[nearby.length];
         for (int i = 0; i < nearby.length; i++) {
@@ -24,7 +25,7 @@ public class Headquarters {
             Build.buildLAUNCHER(rc, eDir);
         }
         boolean ri = false;
-            final int[] s = Utility.deserializeMapLocation(rc.readSharedArray(8)); 
+            final int[] s = {0, 1}; 
             final MapLocation leadPos = new MapLocation(s[0], s[1]);
         if(rc.canBuildAnchor(Anchor.ACCELERATING)) {
             rc.buildAnchor(Anchor.ACCELERATING);
@@ -69,9 +70,8 @@ public class Headquarters {
             rc.buildRobot(type, adjLocation);
             newRobot = rc.senseRobotAtLocation(adjLocation);
         } else{
-            return null;
+            return false;
         }
-        return newRobot;
+        return true;
     }
     }
-}

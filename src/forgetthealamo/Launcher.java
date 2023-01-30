@@ -4,10 +4,10 @@ import battlecode.common.*;
 import forgetthealamo.utils.Utility;
 import forgetthealamo.utils.Zone;
 public class Launcher {
-    private static void runLauncher(RobotController rc, Dijkstra dijik) throws GameActionException {
+    private static void runLauncher(RobotController rc) throws GameActionException {
     int ind = 0;
     //init{ //we only want this to be the case on first run
-    final int[] idIndexN = Utility.getSageIndex(rc); //gives an index for robot to reference //TODO: find some way to cache this
+    final int[] idIndexN = {20}; //gives an index for robot to reference //TODO: find some way to cache this
     final int idIndex = idIndexN[0];
     final int unit = idIndexN[1];
     if (idIndex == -1) {
@@ -51,7 +51,7 @@ public class Launcher {
 
     rc.setIndicatorString(String.valueOf(++ind));
     int[] centerDe = new int[]{rc.getMapWidth()/2, rc.getMapHeight()/2};
-    MapLocation centerLoc = Utility.getMapCenter(rc); //location of center for Zone creation
+    MapLocation centerLoc = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
     boolean hasCenter = true;
     try{
         centerDe = Utility.deserializeMapLocation(rc.readSharedArray(18+(unit * 15)));
@@ -128,13 +128,13 @@ public class Launcher {
         if(rc.canMove(thisLoc.directionTo(desiredPos))){
             rc.move(thisLoc.directionTo(desiredPos));
         }else{
-            rc.move(dijik.getBestDirection(desiredPos, thisLoc.directionTo(desiredPos)));
+            rc.move(thisLoc.directionTo(desiredPos));
         }
     }else{
         if(rc.canMove(thisLoc.directionTo(centerLoc))){
             rc.move(thisLoc.directionTo(centerLoc));
         }else{
-            rc.move(dijik.getBestDirection(centerLoc, thisLoc.directionTo(centerLoc)));
+            rc.move(thisLoc.directionTo(centerLoc));
         }
     }
     } 

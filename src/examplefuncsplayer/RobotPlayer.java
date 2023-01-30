@@ -1,8 +1,11 @@
 package examplefuncsplayer;
 
 import battlecode.common.*;
+import battlecode.world.Island;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -56,7 +59,7 @@ public strictfp class RobotPlayer {
 
         // Hello world! Standard output is very useful for debugging.
         // Everything you say here will be directly viewable in your terminal when you run a match!
-        System.out.println("I'm a " + rc.getType() + " and I just got created! I have health " + rc.getHealth());
+        // System.out.println("I'm a " + rc.getType() + " and I just got created! I have health " + rc.getHealth());
 
         // You can also use indicators to save debug notes in replays.
         rc.setIndicatorString("Hello world!");
@@ -75,12 +78,12 @@ public strictfp class RobotPlayer {
                 // use different strategies on different robots. If you wish, you are free to rewrite
                 // this into a different control structure!
                 switch (rc.getType()) {
-                    case HEADQUARTERS:     Headquarters.runHeadquarters(rc);  break;
-                    case CARRIER:      Carrier.runCarrier(rc);   break;
-                    case LAUNCHER: Launcher.runLauncher(rc); break;
+                    case HEADQUARTERS:     runHeadquarters(rc);  break;
+                    case CARRIER:      runCarrier(rc);   break;
+                    case LAUNCHER: runLauncher(rc); break;
                     case BOOSTER: // Examplefuncsplayer doesn't use any of these robot types below.
                     case DESTABILIZER: // You might want to give them a try!
-                    case AMPLIFIER: Amplifier.runAmplifier(rc);       break;
+                    case AMPLIFIER: break;
                 }
 
             } catch (GameActionException e) {
@@ -118,47 +121,92 @@ public strictfp class RobotPlayer {
         if (rc.canBuildAnchor(Anchor.STANDARD)) {
             // If we can build an anchor do it!
             rc.buildAnchor(Anchor.STANDARD);
-            rc.setIndicatorString("Building anchor! " + rc.getAnchor());
+            System.out.println("Built anchor");
+            // rc.setIndicatorString("Building anchor! " + rc.getAnchor());
         }
-        if (rng.nextBoolean()) {
-            // Let's try to build a carrier.
-            rc.setIndicatorString("Trying to build a carrier");
-            if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
-                rc.buildRobot(RobotType.CARRIER, newLoc);
+
+        // If not, 30% of making a carrier or launcher
+        if (rng.nextFloat() <= 0.3) {
+            if (rng.nextFloat() > 0.7) {
+                // Let's try to build a carrier.
+                rc.setIndicatorString("Trying to build a carrier");
+                if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
+                    rc.buildRobot(RobotType.CARRIER, newLoc);
+                }
+            } else {
+                // Let's try to build a launcher.
+                rc.setIndicatorString("Trying to build a launcher");
+                if (rc.canBuildRobot(RobotType.LAUNCHER, newLoc)) {
+                    rc.buildRobot(RobotType.LAUNCHER, newLoc);
+                }
             }
-        } else {
-            // Let's try to build a launcher.
-            rc.setIndicatorString("Trying to build a launcher");
-            if (rc.canBuildRobot(RobotType.LAUNCHER, newLoc)) {
-                rc.buildRobot(RobotType.LAUNCHER, newLoc);
-            }
+
         }
     }
+
+    static MapLocation targetCarrierLocation = null;
+    static boolean occupyingIsland = false;
 
     /**
      * Run a single turn for a Carrier.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
      */
     static void runCarrier(RobotController rc) throws GameActionException {
+        boolean moved = false;
+
+        // Occasionally try out the carriers attack
+        if (rng.nextInt(20) <= (occupyingIsland ? 10 : 1)) {
+            RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+            if (enemyRobots.length > 0) {
+                if (rc.canAttack(enemyRobots[0].location)) {
+                    rc.attack(enemyRobots[0].location);
+                }
+            }
+        }
+
+        if (occupyingIsland) return;
+
+        for (RobotInfo info : rc.senseNearbyRobots()) {
+            if (info.type == RobotType.HEADQUARTERS && rc.canTakeAnchor(info.location, Anchor.STANDARD))
+                rc.takeAnchor(info.location, Anchor.STANDARD);
+        }
+
         if (rc.getAnchor() != null) {
             // If I have an anchor singularly focus on getting it to the first island I see
             int[] islands = rc.senseNearbyIslands();
-            Set<MapLocation> islandLocs = new HashSet<>();
+            ArrayList<MapLocation> islandLocs = new ArrayList<>();
             for (int id : islands) {
                 MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
                 islandLocs.addAll(Arrays.asList(thisIslandLocs));
             }
+            // islandLocs.sort((a, b) -> {
+            //     try {
+            //         return new Integer((rc.senseTeamOccupyingIsland(rc.senseIsland(b)) == Team.NEUTRAL ? 1 : 0))
+            //             .compareTo(rc.senseTeamOccupyingIsland(rc.senseIsland(a)) == Team.NEUTRAL ? 1 : 0);
+            //     } catch (GameActionException e) {
+            //         // TODO Auto-generated catch block
+            //         e.printStackTrace();
+            //         return -1;
+            //     }
+            // });
             if (islandLocs.size() > 0) {
                 MapLocation islandLocation = islandLocs.iterator().next();
+
                 rc.setIndicatorString("Moving my anchor towards " + islandLocation);
                 while (!rc.getLocation().equals(islandLocation)) {
                     Direction dir = rc.getLocation().directionTo(islandLocation);
                     if (rc.canMove(dir)) {
                         rc.move(dir);
+                        moved = true;
                     }
                 }
+
+                if (rng.nextInt(10) < 7)
+                    occupyingIsland = true;
+
                 if (rc.canPlaceAnchor()) {
                     rc.setIndicatorString("Huzzah, placed anchor!");
+                    System.out.println("Placed anchor");
                     rc.placeAnchor();
                 }
             }
@@ -179,28 +227,30 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-        // Occasionally try out the carriers attack
-        if (rng.nextInt(20) == 1) {
-            RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
-            if (enemyRobots.length > 0) {
-                if (rc.canAttack(enemyRobots[0].location)) {
-                    rc.attack(enemyRobots[0].location);
-                }
-            }
-        }
+
+
         
         // If we can see a well, move towards it
         WellInfo[] wells = rc.senseNearbyWells();
         if (wells.length > 1 && rng.nextInt(3) == 1) {
             WellInfo well_one = wells[1];
             Direction dir = me.directionTo(well_one.getMapLocation());
-            if (rc.canMove(dir)) 
+            if (rc.canMove(dir)) {
                 rc.move(dir);
+                moved = true;
+            }
         }
-        // Also try to move randomly.
-        Direction dir = directions[rng.nextInt(directions.length)];
-        if (rc.canMove(dir)) {
-            rc.move(dir);
+
+        if (!moved) {
+            while (targetCarrierLocation == null || me.equals(targetCarrierLocation) || !rc.canMove(me.directionTo(targetCarrierLocation))) {
+                targetCarrierLocation = new MapLocation(rng.nextInt(rc.getMapWidth()), rng.nextInt(rc.getMapHeight()));
+            }
+
+            Direction dir = me.directionTo(targetCarrierLocation);
+
+            if (rc.canMove(dir)) {
+                rc.move(dir);
+            }
         }
     }
 
@@ -213,9 +263,9 @@ public strictfp class RobotPlayer {
         int radius = rc.getType().actionRadiusSquared;
         Team opponent = rc.getTeam().opponent();
         RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
-        if (enemies.length >= 0) {
-            // MapLocation toAttack = enemies[0].location;
-            MapLocation toAttack = rc.getLocation().add(Direction.EAST);
+
+        if (enemies.length > 0) {
+            MapLocation toAttack = enemies[0].location;
 
             if (rc.canAttack(toAttack)) {
                 rc.setIndicatorString("Attacking");        
